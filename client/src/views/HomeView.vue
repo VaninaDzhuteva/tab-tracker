@@ -1,18 +1,18 @@
 <template>
-  <HelloWorld />
+  <TabTracker />
 </template>
 
 <script>
 import { defineComponent } from 'vue';
 
 // Components
-import HelloWorld from '../components/HelloWorld.vue';
+ import TabTracker from '@/components/TabTracker.vue'
 
 export default defineComponent({
   name: 'HomeView',
 
   components: {
-    HelloWorld,
+    TabTracker,
   },
 });
 </script>
