@@ -81,12 +81,7 @@ export default {
 
   computed: {
     isLoggedIn () {
-      // Option A: localStorage token (common in this project type)
       return !!localStorage.getItem('token')
-
-      // Option B (if you use Vuex/Pinia):
-      // return this.$store.getters.isAuthenticated
-      // return this.authStore.isLoggedIn
     },
   },
 

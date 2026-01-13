@@ -1,13 +1,16 @@
 const AuthenticationController = require('./controllers/AuthenticationController');
-
+const SongsController = require('./controllers/SongsController');
 const AuthenticationControllerPolicy = require('./policies/AuthenticationControllerPolicy');
 
 module.exports = (app) => {
-    app.post('/register',
-        AuthenticationControllerPolicy.register,
-        AuthenticationController.register)
+  app.post('/register',
+    AuthenticationControllerPolicy.register,
+    AuthenticationController.register)
 
-    app.post('/login',
-    AuthenticationController.login
-  )
+  app.post('/login',
+    AuthenticationController.login)
+
+  app.get('/songs', SongsController.index)
+  app.post('/songs', SongsController.create)
+  app.delete('/songs/:id', SongsController.remove)
 }
