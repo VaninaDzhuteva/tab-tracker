@@ -15,7 +15,8 @@ module.exports = {
             const song = await Song.create({
                 title: req.body.title,
                 artist: req.body.artist,
-                tab: req.body.tab
+                tab: req.body.tab,
+                userId: req.user.id
             });
 
             res.send(song);
@@ -27,8 +28,17 @@ module.exports = {
     async remove(req, res) {
         try {
             const { id } = req.params;
-            await Song.destroy({where: {id}});
-            res.send({ok: true})
+
+            const deletedCount = await Song.destroy({
+                where: { id, userId: req.user.id }
+            });
+
+            if (!deletedCount) {
+                return res.status(404).send({ error: 'Song not found.' })
+            }
+
+            res.send({ od: true })
+
         } catch(error) {
             res.status(400).send({ error: 'Could not delete song.' })
         }
