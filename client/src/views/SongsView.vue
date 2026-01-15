@@ -23,7 +23,7 @@
       </v-col>
 
       <v-col cols="12" md="5">
-        <v-select v-model="sortMode" :items="sortOptions" item-title="label" item-value="value" label="Sort"
+        <v-select v-model="sortMode" :items="sortOptions" item-value="value" label="Sort"
           prepend-inner-icon="mdi-sort" variant="outlined" density="comfortable" />
       </v-col>
     </v-row>
@@ -50,54 +50,66 @@
 
     <!-- List -->
     <v-card v-else rounded="xl">
-      <v-list lines="two">
-        <v-list-item v-for="song in filteredSongs" :key="getId(song)" class="py-2">
-          <template #prepend>
-            <v-avatar color="primary" variant="tonal">
-              <v-icon>mdi-music</v-icon>
-            </v-avatar>
-          </template>
+      <v-list lines="two" class="bg-transparent">
+        <template v-for="song in filteredSongs" :key="getId(song)">
+          <!-- ROW -->
+          <v-list-item class="px-3 rounded-lg">
+            <div class="d-flex align-center justify-space-between w-100">
+              <!-- LEFT: icon + text -->
+              <div class="d-flex align-center">
+                <v-avatar color="primary" variant="tonal" class="mr-4">
+                  <v-icon>mdi-music</v-icon>
+                </v-avatar>
 
-          <v-list-item-title class="font-weight-bold">
-            {{ getTitle(song) }}
-          </v-list-item-title>
+                <div class="px-2">
+                  <v-list-item-title class="font-weight-bold mb-1">
+                    {{ getTitle(song) }}
+                  </v-list-item-title>
 
-          <v-list-item-subtitle>
-            {{ getSubtitle(song) }}
-          </v-list-item-subtitle>
+                  <v-list-item-subtitle>
+                    {{ getSubtitle(song) }}
+                  </v-list-item-subtitle>
+                </div>
+              </div>
 
-          <template #append>
-            <div class="d-flex align-center" style="gap: 6px;">
-              <v-btn icon variant="text" :title="expandedId === getId(song) ? 'Hide details' : 'Show details'"
-                @click="toggleExpand(song)">
-                <v-icon>
-                  {{ expandedId === getId(song) ? 'mdi-chevron-up' : 'mdi-chevron-down' }}
-                </v-icon>
-              </v-btn>
+              <!-- RIGHT: actions -->
+              <div class="d-flex align-center pl-4" style="gap: 12px;">
+                <v-btn icon variant="text" :title="expandedId === getId(song) ? 'Hide tab' : 'Show tab'"
+                  @click.stop="toggleExpand(song)">
+                  <v-icon>
+                    {{ expandedId === getId(song) ? 'mdi-chevron-up' : 'mdi-chevron-down' }}
+                  </v-icon>
+                </v-btn>
 
-              <v-btn icon variant="text" color="error" title="Delete" :loading="deletingId === getId(song)"
-                @click="askDelete(song)">
-                <v-icon>mdi-delete-outline</v-icon>
-              </v-btn>
+                <v-btn icon variant="text" color="error" title="Delete" :loading="deletingId === getId(song)"
+                  @click.stop="askDelete(song)">
+                  <v-icon>mdi-delete-outline</v-icon>
+                </v-btn>
+              </div>
             </div>
-          </template>
-        </v-list-item>
+          </v-list-item>
 
-        <!-- Expanded JSON details -->
-        <v-expand-transition>
-          <div v-if="expandedSong" class="px-4 pb-4">
-            <v-divider class="mb-3" />
-            <div class="d-flex align-center justify-space-between mb-2">
-              <div class="text-subtitle-2 font-weight-bold">Raw song data</div>
-              <v-btn size="small" variant="outlined" @click="copyJson(expandedSong)">
-                <v-icon start size="18">mdi-content-copy</v-icon>
-                Copy JSON
-              </v-btn>
+          <v-expand-transition>
+            <div v-if="expandedId === getId(song)" class="mx-4 mb-4 mt-2 pa-4 rounded-lg"
+              style="background: rgba(0,0,0,0.04);">
+              <div class="d-flex align-center justify-space-between mb-3">
+                <div class="text-subtitle-2 font-weight-bold">Tab</div>
+
+                <v-btn v-if="getTab(song)" size="small" variant="outlined" @click="copyTab(song)">
+                  <v-icon start size="18">mdi-content-copy</v-icon>
+                  Copy
+                </v-btn>
+              </div>
+
+              <v-alert v-if="!getTab(song)" type="info" variant="tonal" border="start">
+                No tab content available for this song yet.
+              </v-alert>
+
+              <pre v-else class="tab-box">{{ getTab(song) }}</pre>
             </div>
+          </v-expand-transition>
 
-            <pre class="json-box">{{ prettyJson(expandedSong) }}</pre>
-          </div>
-        </v-expand-transition>
+        </template>
       </v-list>
     </v-card>
 
@@ -115,7 +127,7 @@
         </v-card-text>
         <v-card-actions>
           <v-spacer />
-          <v-btn variant="text" @click="deleteDialog = false" :disabled="deletingId">
+          <v-btn variant="text" @click="deleteDialog = false" :disabled="!!deletingId">
             Cancel
           </v-btn>
           <v-btn color="error" @click="confirmDelete" :loading="!!deletingId">
@@ -133,60 +145,58 @@
 </template>
 
 <script>
-import SongsService from '@/services/SongsService.js';
+import SongsService from "@/services/SongsService.js";
 
 export default {
-  name: 'SongsView',
+  name: "SongsView",
 
   data() {
     return {
       songs: [],
       loading: false,
       error: null,
-      search: '',
-      sortMode: 'newest',
+
+      search: "",
+      sortMode: "newest",
       sortOptions: [
-        { label: "Newest first (createdAt)", value: "newest" },
-        { label: "Oldest first (createdAt)", value: "oldest" },
-        { label: "Title A → Z (best guess)", value: "title_asc" },
-        { label: "Title Z → A (best guess)", value: "title_desc" },
+        { title: "Newest first (createdAt)", value: "newest" },
+        { title: "Oldest first (createdAt)", value: "oldest" },
+        { title: "Title A → Z (best guess)", value: "title_asc" },
+        { title: "Title Z → A (best guess)", value: "title_desc" },
       ],
+
       expandedId: null,
+
       deleteDialog: false,
       pendingDelete: null,
       deletingId: null,
-      snackbar: { show: false, text: '' }
-    }
+
+      snackbar: { show: false, text: "" },
+    };
   },
 
   computed: {
-    expandedSong() {
-      if (!this.expandedId) return null;
-      return this.songs.find((s) => this.getId(s) === this.expandedId) || null
-    },
     filteredSongs() {
       const q = this.search.trim().toLowerCase();
 
-      // search across stringified object
       let list = this.songs.filter((song) => {
         if (!q) return true;
         try {
           return JSON.stringify(song).toLowerCase().includes(q);
-        } catch (e) {
+        } catch {
           return false;
         }
       });
 
-      //sorting
       const byTitle = (a, b) => this.getTitle(a).localeCompare(this.getTitle(b));
 
       const getCreated = (s) => {
         const v = s?.createdAt || s?.created_at || s?.created || s?.date;
         const t = v ? new Date(v).getTime() : 0;
         return Number.isFinite(t) ? t : 0;
-      }
+      };
 
-      if (this.sortMode === 'newest') {
+      if (this.sortMode === "newest") {
         list = [...list].sort((a, b) => getCreated(b) - getCreated(a));
       } else if (this.sortMode === "oldest") {
         list = [...list].sort((a, b) => getCreated(a) - getCreated(b));
@@ -197,7 +207,7 @@ export default {
       }
 
       return list;
-    }
+    },
   },
 
   async created() {
@@ -211,17 +221,29 @@ export default {
 
       try {
         const res = await SongsService.fetchAll();
-        this.songs = Array.isArray(res.data) ? res.data : (res.data?.songs || []);
+        this.songs = Array.isArray(res.data) ? res.data : res.data?.songs || [];
       } catch (e) {
-        this.error = e?.response?.data?.error || 'Failed to load songs.'
-      }
-      finally {
+        this.error = e?.response?.data?.error || "Failed to load songs.";
+      } finally {
         this.loading = false;
       }
     },
 
+    toggleExpand(song) {
+      const id = this.getId(song);
+      this.expandedId = this.expandedId === id ? null : id;
+    },
+
     getId(song) {
       return song?.id ?? song?._id ?? song?.uuid ?? this.safeHash(song);
+    },
+
+    safeHash(obj) {
+      try {
+        return "tmp_" + btoa(unescape(encodeURIComponent(JSON.stringify(obj)))).slice(0, 12);
+      } catch {
+        return "tmp_" + Math.random().toString(16).slice(2);
+      }
     },
 
     getTitle(song) {
@@ -236,31 +258,28 @@ export default {
       if (candidates.length) return String(candidates[0]);
 
       const firstString = this.firstStringField(song);
-
       if (firstString) return firstString;
 
-      return 'Untitled song';
+      return "Untitled song";
     },
 
     getSubtitle(song) {
-      const artist =
-        song?.artist || song?.band || song?.author || song?.composer || null;
-
-      const created =
-        song?.createdAt || song?.created_at || song?.created || song?.date || null;
+      const artist = song?.artist || song?.band || song?.author || song?.composer || null;
+      const created = song?.createdAt || song?.created_at || song?.created || song?.date || null;
 
       const bits = [];
-
       if (artist) bits.push(`Artist: ${artist}`);
       if (created) bits.push(`Created: ${this.formatDate(created)}`);
 
-      if (!bits.length) {
-        const keys = song && typeof song === "object" ? Object.keys(song) : [];
-        if (keys.length) bits.push(`Fields: ${keys.slice(0, 5).join(", ")}${keys.length > 5 ? "…" : ""}`);
-        else bits.push("No readable fields yet");
-      }
+      if (!bits.length) bits.push("No extra info");
 
       return bits.join(" • ");
+    },
+
+    formatDate(v) {
+      const d = new Date(v);
+      if (Number.isNaN(d.getTime())) return String(v);
+      return d.toLocaleString();
     },
 
     firstStringField(obj) {
@@ -270,6 +289,27 @@ export default {
         if (typeof v === "string" && v.trim().length) return v.trim();
       }
       return null;
+    },
+
+    // ✅ TAB ONLY (no JSON)
+    getTab(song) {
+      return (
+        song?.tab ||
+        song?.tabs ||
+        song?.content ||
+        song?.notes ||
+        song?.lyrics ||
+        ""
+      );
+    },
+
+    async copyTab(song) {
+      try {
+        await navigator.clipboard.writeText(this.getTab(song));
+        this.snack("Tab copied!");
+      } catch {
+        this.snack("Copy failed.");
+      }
     },
 
     askDelete(song) {
@@ -285,10 +325,9 @@ export default {
 
       try {
         await SongsService.remove(id);
-
         this.songs = this.songs.filter((s) => this.getId(s) !== id);
-        this.snack('Deleted');
         if (this.expandedId === id) this.expandedId = null;
+        this.snack("Deleted.");
       } catch (e) {
         this.error = e?.response?.data?.error || "Failed to delete song.";
       } finally {
@@ -298,44 +337,30 @@ export default {
       }
     },
 
-    prettyJson(obj) {
-      try {
-        return JSON.stringify(obj, null, 2);
-      } catch {
-        return String(obj);
-      }
-    },
-
-    async copyJson(obj) {
-      try {
-        await navigator.clipboard.writeText(this.prettyJson(obj));
-        this.snack("Copied!");
-      } catch {
-        this.snack("Copy failed.");
-      }
-    },
-
     snack(text) {
       this.snackbar.text = text;
       this.snackbar.show = true;
     },
-  }
-}
+  },
+};
 </script>
 
 <style scoped>
-.json-box {
-  background: rgba(0, 0, 0, 0.04);
+code {
+  font-size: 0.9em;
+}
+
+.tab-box {
+  background: rgba(255, 255, 255, 0.7);
   padding: 12px;
   border-radius: 12px;
   overflow: auto;
-  max-height: 320px;
-  font-size: 12px;
-  line-height: 1.4;
+  max-height: 360px;
+  font-size: 13px;
+  line-height: 1.5;
   margin: 0;
-}
-
-code {
-  font-size: 0.9em;
+  white-space: pre-wrap;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
+    "Courier New", monospace;
 }
 </style>
