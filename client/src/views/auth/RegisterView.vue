@@ -3,17 +3,15 @@
     <v-row justify="center" align="center">
       <v-col cols="12" sm="10" md="7" lg="5">
         <v-card class="pa-6" elevation="6" rounded="xl">
-          <!-- Header -->
           <div class="text-center mb-6">
-            <v-icon size="48" color="primary">mdi-login</v-icon>
-            <h1 class="text-h5 font-weight-bold mt-2">Welcome back</h1>
+            <v-icon size="48" color="primary">mdi-account-plus</v-icon>
+            <h1 class="text-h5 font-weight-bold mt-2">Create your account</h1>
             <p class="text-body-2 text-medium-emphasis mt-1">
-              Log in to continue tracking your tabs.
+              Join Tab Tracker and start saving your tabs.
             </p>
           </div>
 
-          <v-form v-model="isValid" @submit.prevent="login">
-            <!-- Email -->
+          <v-form ref="form" @submit.prevent="registerUser">
             <v-text-field
               v-model.trim="email"
               label="Email"
@@ -26,21 +24,22 @@
               class="mb-3"
             />
 
-            <!-- Password -->
             <v-text-field
               v-model="password"
               :type="showPassword ? 'text' : 'password'"
               label="Password"
-              autocomplete="current-password"
+              autocomplete="new-password"
               prepend-inner-icon="mdi-lock-outline"
               :append-inner-icon="showPassword ? 'mdi-eye-off' : 'mdi-eye'"
               @click:append-inner="showPassword = !showPassword"
               variant="outlined"
               density="comfortable"
               :rules="passwordRules"
+              hint="Minimum 8 characters"
+              persistent-hint
+              class="mb-2"
             />
 
-            <!-- Error -->
             <v-alert
               v-if="error"
               type="error"
@@ -51,7 +50,6 @@
               {{ error }}
             </v-alert>
 
-            <!-- Submit -->
             <v-btn
               class="mt-5"
               color="primary"
@@ -59,19 +57,16 @@
               block
               type="submit"
               :loading="loading"
-              :disabled="!isValid || loading"
+              :disabled="loading"
             >
-              Log in
+              Create account
             </v-btn>
 
-            <!-- Register link -->
             <div class="text-center mt-4">
               <span class="text-body-2 text-medium-emphasis">
-                Don’t have an account?
+                Already have an account?
               </span>
-              <v-btn variant="text" to="/register" router class="px-1">
-                Create one
-              </v-btn>
+              <v-btn variant="text" to="/login" router class="px-1"> Log in </v-btn>
             </div>
           </v-form>
         </v-card>
@@ -81,11 +76,11 @@
 </template>
 
 <script>
-import AuthenticationService from "../services/AuthenticationService.js";
+import AuthenticationServise from "../../services/AuthenticationService.js";
 import { auth } from "@/store/auth";
 
 export default {
-  name: "LoginUser",
+  name: "RegisterUser",
 
   data() {
     return {
@@ -100,27 +95,38 @@ export default {
         (v) => !!v || "Email is required",
         (v) => /.+@.+\..+/.test(v) || "Enter a valid email",
       ],
-      passwordRules: [(v) => !!v || "Password is required"],
+      passwordRules: [
+        (v) => !!v || "Password is required",
+        (v) => (v && v.length >= 8) || "Password must be at least 8 characters",
+      ],
     };
   },
 
   methods: {
-    async login() {
+    async registerUser() {
       this.error = null;
+      const { valid } = await this.$refs.form.validate();
+      if (!valid) return;
+
       this.loading = true;
 
       try {
-        const res = await AuthenticationService.login({
+        await AuthenticationServise.register({
           email: this.email,
           password: this.password,
         });
 
-        auth.setAuth(res.data.token, res.data.user)
+        // Auto-login
+        const res = await AuthenticationServise.login({
+          email: this.email,
+          password: this.password,
+        });
+
+        auth.setAuth(res.data.token, res.data.user);
 
         this.$router.push("/songs");
-      } catch (err) {
-        this.error =
-          err?.response?.data?.error || "Login failed. Please check your credentials.";
+      } catch (error) {
+        this.error = error?.response?.data?.error || "Registration failed.";
       } finally {
         this.loading = false;
       }
@@ -132,6 +138,6 @@ export default {
 <style scoped>
 .fill-height {
   margin-top: 60px;
-  min-height: calc(100vh - 64px);
+  min-height: calc(100vh - 64px); /* leaves space for app-bar */
 }
 </style>
