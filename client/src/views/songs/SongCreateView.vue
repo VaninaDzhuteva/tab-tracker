@@ -14,11 +14,12 @@
 
                     <v-form ref="form" @submit.prevent="createSong">
                         <v-text-field v-model.trim="title" label="Title" prepend-inner-icon="mdi-music"
-                            variant="outlined" density="comfortable" :rules="titleRules" class="mb-3" />
+                            variant="outlined" density="comfortable" :rules="titleRules" hide-details="auto" class="mb-5" />
 
                         <v-text-field v-model.trim="artist" label="Artist (optional)"
-                            prepend-inner-icon="mdi-account-music-outline" variant="outlined" density="comfortable"
-                            class="mb-3" />
+                            prepend-inner-icon="mdi-account-music-outline" variant="outlined" 
+                            density="comfortable" hide-details="auto"
+                            class="mb-5" />
 
                         <v-file-input
                             v-model="pdfFile"
@@ -28,12 +29,14 @@
                             prepend-icon="" 
                             variant="outlined"
                             density="comfortable"
-                            class="mb-3"
+                            hide-details="auto"
+                            class="mb-5"
                             show-size
                         ></v-file-input>
 
                         <v-textarea v-model="tab" label="Tab / Notes" prepend-inner-icon="mdi-note-text-outline"
-                            variant="outlined" density="comfortable" rows="7" auto-grow :rules="tabRules" />
+                            variant="outlined" density="comfortable" rows="7" auto-grow :rules="tabRules" hide-details="auto" />
+
                         <v-alert v-if="error" type="error" variant="tonal" class="mt-4" border="start">
                             {{ error }}
                         </v-alert>

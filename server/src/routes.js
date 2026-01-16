@@ -7,12 +7,14 @@ const upload = require('./middleware/upload')
 module.exports = (app) => {
   app.post('/register',
     AuthenticationControllerPolicy.register,
-    AuthenticationController.register)
+    AuthenticationController.register);
 
   app.post('/login',
-    AuthenticationController.login)
+    AuthenticationController.login);
 
-  app.get('/songs', isAuthenticated, SongsController.index)
-  app.post('/songs', isAuthenticated, upload.single('pdf'), SongsController.create)
-  app.delete('/songs/:id', isAuthenticated, SongsController.remove)
+  app.get('/songs', isAuthenticated, SongsController.index);
+  app.post('/songs', isAuthenticated, upload.single('pdf'), SongsController.create);
+  app.get('/songs/:id',  SongsController.show);
+  app.put('/songs/:id', upload.single('pdf'), SongsController.update);
+  app.delete('/songs/:id', isAuthenticated, SongsController.remove);
 }

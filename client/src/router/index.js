@@ -1,9 +1,11 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import HomeView from '../views/HomeView.vue'
-import RegisterUser from '../views/auth/RegisterView.vue';
-import LoginUser from '../views/auth/LoginView.vue';
-import SongsView from '../views/songs/SongsView.vue'
-import CreateSong from '../views/songs/CreateSong.vue'
+import HomeView from '@/views/HomeView.vue'
+import RegisterUser from '@/views/auth/RegisterView.vue';
+import LoginUser from '@/views/auth/LoginView.vue';
+import SongsView from '@/views/songs/SongsView.vue'
+import CreateSong from '@/views/songs/SongCreateView.vue'
+import SongDetailsView from '@/views/songs/SongDetailsView.vue';
+import SongEditView from '@/views/songs/SongEditView.vue';
 
 const routes = [{
     path: '/',
@@ -30,11 +32,21 @@ const routes = [{
     name: 'songs-create',
     component: CreateSong,
 },
-]
+{
+    path: '/songs/:id',
+    name: 'song-details',
+    component: SongDetailsView
+},
+{   
+    path: '/songs/:id/edit',
+    name: 'song-edit',
+    component: SongEditView
+}
+];
 
 const router = createRouter({
     history: createWebHistory(process.env.BASE_URL),
     routes
-})
+});
 
-export default router
+export default router;

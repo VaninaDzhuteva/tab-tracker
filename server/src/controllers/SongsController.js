@@ -1,12 +1,12 @@
-const {Song} = require ('../models')
+const { Song } = require('../models')
 
 module.exports = {
     async index(req, res) {
         try {
-            const songs = await Song.findAll({ order: [['createdAt', 'DESC']]})
+            const songs = await Song.findAll({ order: [['createdAt', 'DESC']] })
             res.send(songs);
         } catch (err) {
-            res.status(500).send({error: 'Failed to fetch songs'})
+            res.status(500).send({ error: 'Failed to fetch songs' })
         }
     },
 
@@ -28,6 +28,42 @@ module.exports = {
         }
     },
 
+    async show(req, res) {
+        try {
+            const song = await Song.findByPk(req.params.id);
+
+            if (!song) {
+                return res.status(404).send({ error: 'Song not found!' });
+            }
+
+            res.send(song);
+        } catch (e) {
+            console.error('GET /songs/:id failed:', e);
+            res.status(500).send({ error: "Failed to load song." });
+        }
+    },
+
+    async update(req, res) {
+        try {
+            const song = await Song.findByPk(req.params.id);
+            if (!song) return res.status(404).send({ error: 'Song not found.' });
+
+            const nextPdfPath = req.file ? `/uploads/${req.file.filename}` : song.pdfPath;
+
+            await song.update({
+                title: req.body.title,
+                artist: req.body.artist,
+                tab: req.body.tab,
+                pdfPath: nextPdfPath,
+            });
+
+            res.send(song);
+        } catch (e) {
+            console.error('PUT /songs/:id failed:', e)
+            res.status(400).send({ error: 'Could not update song.' })
+        }
+    },
+
     async remove(req, res) {
         try {
             const { id } = req.params;
@@ -42,7 +78,7 @@ module.exports = {
 
             res.send({ od: true })
 
-        } catch(error) {
+        } catch (error) {
             res.status(400).send({ error: 'Could not delete song.' })
         }
     }

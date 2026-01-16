@@ -101,3 +101,9 @@ export default {
   },
 }
 </script>
+
+<style lang="css">
+  .v-main {
+    margin-top: 70px;
+  }
+</style>

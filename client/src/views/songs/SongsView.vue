@@ -53,7 +53,7 @@
       <v-list lines="two" class="bg-transparent">
         <template v-for="song in filteredSongs" :key="getId(song)">
           <!-- ROW -->
-          <v-list-item class="px-3 rounded-lg">
+          <v-list-item class="px-3 rounded-lg" router link :to="`/songs/${getId(song)}`"> 
             <div class="d-flex align-center justify-space-between w-100">
               <!-- LEFT: icon + text -->
               <div class="d-flex align-center">
