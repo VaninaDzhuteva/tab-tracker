@@ -12,11 +12,14 @@ module.exports = {
 
     async create(req, res) {
         try {
+            const pdfPath = req.file ? `/uploads/${req.file.filename}` : null;
+
             const song = await Song.create({
                 title: req.body.title,
                 artist: req.body.artist,
                 tab: req.body.tab,
-                userId: req.user.id
+                userId: req.user.id,
+                pdfPath
             });
 
             res.send(song);

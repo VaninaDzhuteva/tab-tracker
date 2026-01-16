@@ -20,9 +20,20 @@
                             prepend-inner-icon="mdi-account-music-outline" variant="outlined" density="comfortable"
                             class="mb-3" />
 
+                        <v-file-input
+                            v-model="pdfFile"
+                            label="Upload PDF tab (optional)"
+                            accept="application/pdf"
+                            prepend-inner-icon="mdi-file-pdf-box"
+                            prepend-icon="" 
+                            variant="outlined"
+                            density="comfortable"
+                            class="mb-3"
+                            show-size
+                        ></v-file-input>
+
                         <v-textarea v-model="tab" label="Tab / Notes" prepend-inner-icon="mdi-note-text-outline"
                             variant="outlined" density="comfortable" rows="7" auto-grow :rules="tabRules" />
-
                         <v-alert v-if="error" type="error" variant="tonal" class="mt-4" border="start">
                             {{ error }}
                         </v-alert>
@@ -56,13 +67,13 @@ export default {
             tab: "",
             loading: false,
             error: null,
+            pdfFile: [],
 
             titleRules: [
                 (v) => !!v || "Title is required",
                 (v) => (v && v.length >= 2) || "Title must be at least 2 characters",
             ],
 
-            // If you want tab optional, set tabRules: []
             tabRules: [
                 (v) => !!v || "Tab/notes are required",
             ],
@@ -74,16 +85,22 @@ export default {
             this.error = null;
 
             const { valid } = await this.$refs.form.validate();
+
             if (!valid) return;
 
             this.loading = true;
 
             try {
-                await SongsService.create({
-                    title: this.title,
-                    artist: this.artist,
-                    tab: this.tab,
-                });
+                const form = new FormData();
+                form.append('title', this.title);
+                form.append('artist', this.artist || "");
+                form.append('tab', this.tab || "");
+
+                if (this.pdfFile?.length) {
+                    form.append('pdf', this.pdfFile[0]);
+                }
+
+                await SongsService.create(form);
 
                 this.$router.push("/songs");
             } catch (e) {

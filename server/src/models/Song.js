@@ -15,6 +15,10 @@ module.exports = (sequelize, DataTypes) => {
         userId: {
             type: DataTypes.INTEGER,
             allowNull: false
+        },
+        pdfPath: { 
+            type: DataTypes.STRING,
+            allowNull: true 
         }
     })
 
