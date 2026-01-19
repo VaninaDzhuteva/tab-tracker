@@ -2,7 +2,12 @@
     <v-container>
         <div class="d-flex align-center justify-space-between mb-6">
             <div>
-                <h1 class="text-h5 font-weight-bold">{{ title }}</h1>
+                <div class="d-flex align-center" style="gap: 10px;">
+                    <h1 class="text-h5 font-weight-bold">{{ title }}</h1>
+                    <v-chip class="ml-2" size="small" variant="outlined" :color="difficultyColor(song?.difficulty)">
+                        {{ difficultyLabel(song?.difficulty) }}
+                    </v-chip>
+                </div>
                 <p class="text-body-2 text-medium-emphasis">{{ subtitle }}</p>
             </div>
 
@@ -58,18 +63,17 @@
 
         <v-card>
             <div v-if="pdfUrl" class="mt-6">
-                    <div class="text-subtitle-1 font-weight-bold mb-3">PDF Preview</div>
+                <div class="text-subtitle-1 font-weight-bold mb-3">PDF Preview</div>
 
-                    <iframe :src="pdfUrl"
-                        style="width: 100%; height: 600px; border: none; border-radius: 12px;"></iframe>
+                <iframe :src="pdfUrl" style="width: 100%; height: 600px; border: none; border-radius: 12px;"></iframe>
 
-                    <div class="mt-3">
-                        <v-btn :href="pdfUrl" target="_blank" variant="outlined">
-                            <v-icon start>mdi-open-in-new</v-icon>
-                            Open in new tab
-                        </v-btn>
-                    </div>
+                <div class="mt-3">
+                    <v-btn :href="pdfUrl" target="_blank" variant="outlined">
+                        <v-icon start>mdi-open-in-new</v-icon>
+                        Open in new tab
+                    </v-btn>
                 </div>
+            </div>
         </v-card>
 
         <v-snackbar v-model="snackbar.show" :timeout="2500">
@@ -110,7 +114,8 @@ export default {
             snackbar: { show: false, text: '' },
             serverUrl: "http://localhost:8081",
             deleteDialog: false,
-            deleting: false
+            deleting: false,
+
         }
     },
 
@@ -189,9 +194,9 @@ export default {
         async copyTab() {
             try {
                 await navigator.clipboard.writeText(this.tab);
-                this.snackbar('Tab copied!');
+                this.snack('Tab copied!');
             } catch {
-                this.snackbar('Copy failed!');
+                this.snack('Copy failed!');
             }
         },
 
@@ -213,7 +218,31 @@ export default {
                 this.deleting = false;
                 this.deleteDialog = false;
             }
-        }
+        },
+
+        normalizeDifficulty(v) {
+            const s = String(v || "").toLowerCase().trim();
+            return ["beginner", "intermediate", "advanced"].includes(s) ? s : "beginner";
+        },
+
+        difficultyLabel(v) {
+            const d = this.normalizeDifficulty(v);
+            return d === "beginner"
+                ? "Beginner"
+                : d === "intermediate"
+                    ? "Intermediate"
+                    : "Advanced";
+        },
+
+        difficultyColor(v) {
+            const d = this.normalizeDifficulty(v);
+            return d === "beginner"
+                ? "success"
+                : d === "intermediate"
+                    ? "warning"
+                    : "error";
+        },
+
     }
 }
 </script>

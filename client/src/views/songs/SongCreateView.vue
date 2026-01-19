@@ -14,28 +14,24 @@
 
                     <v-form ref="form" @submit.prevent="createSong">
                         <v-text-field v-model.trim="title" label="Title" prepend-inner-icon="mdi-music"
-                            variant="outlined" density="comfortable" :rules="titleRules" hide-details="auto" class="mb-5" />
-
-                        <v-text-field v-model.trim="artist" label="Artist (optional)"
-                            prepend-inner-icon="mdi-account-music-outline" variant="outlined" 
-                            density="comfortable" hide-details="auto"
+                            variant="outlined" density="comfortable" :rules="titleRules" hide-details="auto"
                             class="mb-5" />
 
-                        <v-file-input
-                            v-model="pdfFile"
-                            label="Upload PDF tab (optional)"
-                            accept="application/pdf"
-                            prepend-inner-icon="mdi-file-pdf-box"
-                            prepend-icon="" 
-                            variant="outlined"
-                            density="comfortable"
-                            hide-details="auto"
-                            class="mb-5"
-                            show-size
-                        ></v-file-input>
+                        <v-text-field v-model.trim="artist" label="Artist (optional)"
+                            prepend-inner-icon="mdi-account-music-outline" variant="outlined" density="comfortable"
+                            hide-details="auto" class="mb-5" />
+
+                        <v-select v-model="difficulty" :items="difficultyOptions" item-value="value" label="Difficulty"
+                            prepend-inner-icon="mdi-signal" variant="outlined" density="comfortable"
+                            hide-details="auto" class="mb-5" />
+
+                        <v-file-input v-model="pdfFile" label="Upload PDF tab (optional)" accept="application/pdf"
+                            prepend-inner-icon="mdi-file-pdf-box" prepend-icon="" variant="outlined"
+                            density="comfortable" hide-details="auto" class="mb-5" show-size></v-file-input>
 
                         <v-textarea v-model="tab" label="Tab / Notes" prepend-inner-icon="mdi-note-text-outline"
-                            variant="outlined" density="comfortable" rows="7" auto-grow :rules="tabRules" hide-details="auto" />
+                            variant="outlined" density="comfortable" rows="7" auto-grow :rules="tabRules"
+                            hide-details="auto" />
 
                         <v-alert v-if="error" type="error" variant="tonal" class="mt-4" border="start">
                             {{ error }}
@@ -71,6 +67,12 @@ export default {
             loading: false,
             error: null,
             pdfFile: [],
+            difficulty: 'beginner',
+            difficultyOptions: [
+                { title: 'Beginner', value: "beginner" },
+                { title: 'Intermediate', value: 'intermediate' },
+                { title: 'Advanced', value: 'advanced' }
+            ],
 
             titleRules: [
                 (v) => !!v || "Title is required",
@@ -98,6 +100,7 @@ export default {
                 form.append('title', this.title);
                 form.append('artist', this.artist || "");
                 form.append('tab', this.tab || "");
+                form.append('difficulty', this.difficulty);
 
                 if (this.pdfFile?.length) {
                     form.append('pdf', this.pdfFile[0]);

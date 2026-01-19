@@ -24,6 +24,9 @@
                 <v-text-field v-model="artist" label="Artist (optional)" variant="outlined" density="comfortable"
                     hide-details="auto" class="mt-3" />
 
+                <v-select v-model="difficulty" :items="difficultyOptions" item-value="value" label="Difficulty"
+                    prepend-inner-icon="mdi-signal" variant="outlined" density="comfortable" hide-details="auto" />
+
                 <v-textarea v-model="tab" label="Tab (optional)" variant="outlined" density="comfortable"
                     hide-details="auto" rows="10" class="mt-3" />
 
@@ -95,6 +98,7 @@ export default {
                 this.title = this.song?.title || '';
                 this.artist = this.song?.artist || "";
                 this.tab = this.song?.tab || "";
+                this.difficulty = this.song?.difficulty || "beginner";
             } catch (e) {
                 this.error = e?.response?.data?.error || "Failed to load song.";
             } finally {
@@ -115,6 +119,7 @@ export default {
                 form.append('title', this.title);
                 form.append("artist", this.artist || "");
                 form.append("tab", this.tab || "");
+                form.append('difficulty', this.difficulty);
 
                 if (this.pdfFile?.length) {
                     form.append("pdf", this.pdfFile[0]);
@@ -123,10 +128,10 @@ export default {
                 await SongsService.update(this.songId, form);
                 this.snack('Saved');
                 this.$router.push(`/songs/${this.songId}`);
-                
+
             } catch (e) {
                 console.log(e);
-                
+
                 this.error = e?.response?.data?.error || 'Failed to update song.';
             } finally {
                 this.loading = false;

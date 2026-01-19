@@ -16,10 +16,15 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.INTEGER,
             allowNull: false
         },
-        pdfPath: { 
+        pdfPath: {
             type: DataTypes.STRING,
-            allowNull: true 
-        }
+            allowNull: true
+        },
+        difficultydifficulty: {
+            type: DataTypes.ENUM('beginner', 'intermediate', 'advanced'),
+            allowNull: false,
+            defaultValue: 'beginner',
+        },
     })
 
     return Song

@@ -17,14 +17,21 @@
 
     <!-- Controls -->
     <v-row class="mb-2" dense>
-      <v-col cols="12" md="7">
+      <v-col cols="12" md="4">
         <v-text-field v-model="search" label="Search" placeholder="Search by any text..."
           prepend-inner-icon="mdi-magnify" variant="outlined" density="comfortable" clearable />
       </v-col>
 
-      <v-col cols="12" md="5">
-        <v-select v-model="sortMode" :items="sortOptions" item-value="value" label="Sort"
-          prepend-inner-icon="mdi-sort" variant="outlined" density="comfortable" />
+      <v-col cols="12" md="4">
+        <v-select v-model="sortMode" :items="sortOptions" item-value="value" label="Sort" prepend-inner-icon="mdi-sort"
+          variant="outlined" density="comfortable" />
+      </v-col>
+
+      <v-col cols="12" md="4">
+        <v-select v-model="difficultyFilter" :items="difficultyFilterOptions" item-value="value" label="Difficulty"
+          prepend-inner-icon="mdi-filter" variant="outlined" density="comfortable" hide-details="auto">
+
+        </v-select>
       </v-col>
     </v-row>
 
@@ -53,7 +60,7 @@
       <v-list lines="two" class="bg-transparent">
         <template v-for="song in filteredSongs" :key="getId(song)">
           <!-- ROW -->
-          <v-list-item class="px-3 rounded-lg" router link :to="`/songs/${getId(song)}`"> 
+          <v-list-item class="px-3 rounded-lg" router link :to="`/songs/${getId(song)}`">
             <div class="d-flex align-center justify-space-between w-100">
               <!-- LEFT: icon + text -->
               <div class="d-flex align-center">
@@ -62,11 +69,17 @@
                 </v-avatar>
 
                 <div class="px-2">
-                  <v-list-item-title class="font-weight-bold mb-1">
-                    {{ getTitle(song) }}
-                  </v-list-item-title>
+                  <div class="d-flex align-center" style="gap: 10px;">
+                    <v-list-item-title class="font-weight-bold mb-1">
+                      {{ getTitle(song) }}
+                    </v-list-item-title>
+                    <v-chip size="small" variant="outlined" :color="difficultyColor(getDifficulty(song))">
+                      {{ difficultyLabel(getDifficulty(song)) }}
+                    </v-chip>
+                  </div>
 
-                  <v-list-item-subtitle>
+
+                  <v-list-item-subtitle class="mt-3">
                     {{ getSubtitle(song) }}
                   </v-list-item-subtitle>
                 </div>
@@ -155,7 +168,6 @@ export default {
       songs: [],
       loading: false,
       error: null,
-
       search: "",
       sortMode: "newest",
       sortOptions: [
@@ -164,14 +176,18 @@ export default {
         { title: "Title A → Z (best guess)", value: "title_asc" },
         { title: "Title Z → A (best guess)", value: "title_desc" },
       ],
-
       expandedId: null,
-
       deleteDialog: false,
       pendingDelete: null,
       deletingId: null,
-
       snackbar: { show: false, text: "" },
+      difficultyFilter: 'all',
+      difficultyFilterOptions: [
+        { title: 'All', value: 'all' },
+        { title: "Beginner", value: "beginner" },
+        { title: "Intermediate", value: "intermediate" },
+        { title: "Advanced", value: "advanced" },
+      ]
     };
   },
 
@@ -204,6 +220,10 @@ export default {
         list = [...list].sort(byTitle);
       } else if (this.sortMode === "title_desc") {
         list = [...list].sort((a, b) => byTitle(b, a));
+      }
+
+      if (this.difficultyFilter !== 'all') {
+        list = list.filter((s) => (s?.difficulty || 'beginner') === this.difficultyFilter);
       }
 
       return list;
@@ -291,7 +311,6 @@ export default {
       return null;
     },
 
-    // ✅ TAB ONLY (no JSON)
     getTab(song) {
       return (
         song?.tab ||
@@ -341,6 +360,34 @@ export default {
       this.snackbar.text = text;
       this.snackbar.show = true;
     },
+
+    getDifficulty(song) {
+      return song?.difficulty || 'beginner';
+    },
+
+    normalizeDifficulty(v) {
+      const s = String(v || "").toLowerCase().trim();
+      return ["beginner", "intermediate", "advanced"].includes(s) ? s : "beginner";
+    },
+
+    difficultyLabel(v) {
+      const d = this.normalizeDifficulty(v);
+      return d === "beginner"
+        ? "Beginner"
+        : d === "intermediate"
+          ? "Intermediate"
+          : "Advanced";
+    },
+
+    difficultyColor(v) {
+      const d = this.normalizeDifficulty(v);
+      return d === "beginner"
+        ? "success"
+        : d === "intermediate"
+          ? "warning"
+          : "error";
+    },
+
   },
 };
 </script>

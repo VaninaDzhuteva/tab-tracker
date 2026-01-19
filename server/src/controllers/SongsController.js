@@ -19,7 +19,8 @@ module.exports = {
                 artist: req.body.artist,
                 tab: req.body.tab,
                 userId: req.user.id,
-                pdfPath
+                pdfPath,
+                difficulty: req.body.difficulty || 'beginner'
             });
 
             res.send(song);
@@ -55,6 +56,7 @@ module.exports = {
                 artist: req.body.artist,
                 tab: req.body.tab,
                 pdfPath: nextPdfPath,
+                difficulty: req.body.difficulty || song.difficulty,
             });
 
             res.send(song);
