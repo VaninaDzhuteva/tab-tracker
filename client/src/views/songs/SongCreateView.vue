@@ -22,16 +22,31 @@
                             hide-details="auto" class="mb-5" />
 
                         <v-select v-model="difficulty" :items="difficultyOptions" item-value="value" label="Difficulty"
-                            prepend-inner-icon="mdi-signal" variant="outlined" density="comfortable"
-                            hide-details="auto" class="mb-5" />
+                            prepend-inner-icon="mdi-signal" variant="outlined" density="comfortable" hide-details="auto"
+                            class="mb-5" />
 
                         <v-file-input v-model="pdfFile" label="Upload PDF tab (optional)" accept="application/pdf"
                             prepend-inner-icon="mdi-file-pdf-box" prepend-icon="" variant="outlined"
                             density="comfortable" hide-details="auto" class="mb-5" show-size></v-file-input>
 
-                        <v-textarea v-model="tab" label="Tab / Notes" prepend-inner-icon="mdi-note-text-outline"
+                        <v-textarea v-model="tab" class="mb-5" label="Tab / Notes" prepend-inner-icon="mdi-note-text-outline"
                             variant="outlined" density="comfortable" rows="7" auto-grow :rules="tabRules"
                             hide-details="auto" />
+
+                        <v-text-field v-model="tagInput" label="Add tag" variant="outlined" density="comfortable"
+                            hide-details="auto" @keydown.enter.prevent="addTag(tagInput)" />
+
+                        <div class="d-flex flex-wrap mt-2 " style="gap: 8px;">
+                            <v-chip v-for="tag in tags" :key="tag" closable @click:close="removeTag(tag)">
+                                {{ tag }}
+                            </v-chip>
+                        </div>
+
+                        <div class="d-flex flex-wrap mt-3 mb-5" style="gap: 8px;">
+                            <v-chip v-for="t in tagSuggestions" :key="t" variant="outlined" @click="addTag(t)">
+                                + {{ t }}
+                            </v-chip>
+                        </div>
 
                         <v-alert v-if="error" type="error" variant="tonal" class="mt-4" border="start">
                             {{ error }}
@@ -73,6 +88,9 @@ export default {
                 { title: 'Intermediate', value: 'intermediate' },
                 { title: 'Advanced', value: 'advanced' }
             ],
+            tags: [],
+            tagInput: '',
+            tagSuggestions: ["rock", "pop", "blues", "jazz", "metal", "punk", "indie", "country", "folk", "funk", "reggae", "classical"],
 
             titleRules: [
                 (v) => !!v || "Title is required",
@@ -101,6 +119,7 @@ export default {
                 form.append('artist', this.artist || "");
                 form.append('tab', this.tab || "");
                 form.append('difficulty', this.difficulty);
+                form.append("tags", JSON.stringify(this.tags));
 
                 if (this.pdfFile?.length) {
                     form.append('pdf', this.pdfFile[0]);
@@ -117,6 +136,18 @@ export default {
                 this.loading = false;
             }
         },
+
+        addTag(raw) {
+            const tag = String(raw || '').toLowerCase().trim();
+            if (!tag) return;
+            if(this.tags.includes(tag)) return;
+            this.tags.push(tag);
+            this.tagInput = '';
+        },
+
+        removeTag(tag) {
+            this.tags = this.tags.filter(t => t !== tag);
+        }
     },
 };
 </script>

@@ -25,6 +25,11 @@ module.exports = (sequelize, DataTypes) => {
             allowNull: false,
             defaultValue: 'beginner',
         },
+        tags: {
+            type: DataTypes.TEXT,   
+            allowNull: false,
+            defaultValue: '[]',
+        },
     })
 
     return Song

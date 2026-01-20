@@ -17,20 +17,25 @@
 
     <!-- Controls -->
     <v-row class="mb-2" dense>
-      <v-col cols="12" md="4">
+      <v-col cols="12" md="3">
         <v-text-field v-model="search" label="Search" placeholder="Search by any text..."
           prepend-inner-icon="mdi-magnify" variant="outlined" density="comfortable" clearable />
       </v-col>
 
-      <v-col cols="12" md="4">
+      <v-col cols="12" md="3">
         <v-select v-model="sortMode" :items="sortOptions" item-value="value" label="Sort" prepend-inner-icon="mdi-sort"
           variant="outlined" density="comfortable" />
       </v-col>
 
-      <v-col cols="12" md="4">
+      <v-col cols="12" md="3">
         <v-select v-model="difficultyFilter" :items="difficultyFilterOptions" item-value="value" label="Difficulty"
           prepend-inner-icon="mdi-filter" variant="outlined" density="comfortable" hide-details="auto">
+        </v-select>
+      </v-col>
 
+      <v-col cols="12" md="3">
+        <v-select v-model="tagFilter" :items="availableTags" label="Tag" variant="outlined" density="comfortable"
+          hide-details="auto">
         </v-select>
       </v-col>
     </v-row>
@@ -56,75 +61,85 @@
     </v-card>
 
     <!-- List -->
-    <v-card v-else rounded="xl">
-      <v-list lines="two" class="bg-transparent">
-        <template v-for="song in filteredSongs" :key="getId(song)">
-          <!-- ROW -->
-          <v-list-item class="px-3 rounded-lg" router link :to="`/songs/${getId(song)}`">
-            <div class="d-flex align-center justify-space-between w-100">
-              <!-- LEFT: icon + text -->
-              <div class="d-flex align-center">
-                <v-avatar color="primary" variant="tonal" class="mr-4">
-                  <v-icon>mdi-music</v-icon>
-                </v-avatar>
+    <v-row v-else dense>
+      <v-col v-for="song in filteredSongs" :key="getId(song)" cols="12" md="6" lg="4">
+        <v-card rounded="xl" elevation="2" class="h-100 song-card" @click="$router.push(`/songs/${getId(song)}`)">
+          <!-- Header -->
+          <div class="d-flex align-center justify-center pa-4">
+            <v-avatar color="primary" variant="tonal">
+              <v-icon>mdi-music</v-icon>
+            </v-avatar>
+          </div>
+          <div class="d-flex align-center justify-space-between pa-4">
+            <div class="d-flex align-center" style="gap: 12px;">
 
-                <div class="px-2">
-                  <div class="d-flex align-center" style="gap: 10px;">
-                    <v-list-item-title class="font-weight-bold mb-1">
-                      {{ getTitle(song) }}
-                    </v-list-item-title>
-                    <v-chip size="small" variant="outlined" :color="difficultyColor(getDifficulty(song))">
-                      {{ difficultyLabel(getDifficulty(song)) }}
+              <div>
+                <div class="d-flex align-center justify-space-between" style="gap: 8px;">
+                  <div class="font-weight-bold text-body-1">
+                    {{ getTitle(song) }}
+                  </div>
+
+                  <v-chip size="x-small" variant="outlined" :color="difficultyColor(getDifficulty(song))">
+                    {{ difficultyLabel(getDifficulty(song)) }}
+                  </v-chip>
+
+                  <v-btn icon variant="text" color="error" title="Delete" :loading="deletingId === getId(song)"
+                    @click.stop="askDelete(song)">
+                    <v-icon>mdi-delete-outline</v-icon>
+                  </v-btn>
+                </div>
+
+                <div class="text-body-2 text-medium-emphasis mt-1">
+                  {{ getSubtitle(song) }}
+                </div>
+
+                
+                  <!-- Tags -->
+                  <div class="mt-3 pb-2 d-flex flex-wrap" style="gap: 6px;">
+                    <v-chip v-for="tag in getTags(song).slice(0, 5)" :key="tag" size="x-small" variant="outlined">
+                      {{ tag }}
                     </v-chip>
                   </div>
 
-
-                  <v-list-item-subtitle class="mt-3">
-                    {{ getSubtitle(song) }}
-                  </v-list-item-subtitle>
-                </div>
-              </div>
-
-              <!-- RIGHT: actions -->
-              <div class="d-flex align-center pl-4" style="gap: 12px;">
-                <v-btn icon variant="text" :title="expandedId === getId(song) ? 'Hide tab' : 'Show tab'"
-                  @click.stop="toggleExpand(song)">
-                  <v-icon>
-                    {{ expandedId === getId(song) ? 'mdi-chevron-up' : 'mdi-chevron-down' }}
-                  </v-icon>
-                </v-btn>
-
-                <v-btn icon variant="text" color="error" title="Delete" :loading="deletingId === getId(song)"
-                  @click.stop="askDelete(song)">
-                  <v-icon>mdi-delete-outline</v-icon>
-                </v-btn>
+                  
               </div>
             </div>
-          </v-list-item>
 
+            <!-- Actions -->
+            <div class="d-flex align-center" style="gap: 6px;">
+              <v-btn icon variant="text" :title="expandedId === getId(song) ? 'Hide tab' : 'Show tab'"
+                @click.stop="toggleExpand(song)">
+                <v-icon>
+                  {{ expandedId === getId(song) ? 'mdi-chevron-up' : 'mdi-chevron-down' }}
+                </v-icon>
+              </v-btn>
+
+            </div>
+          </div>
+
+          <!-- Expandable tab -->
           <v-expand-transition>
-            <div v-if="expandedId === getId(song)" class="mx-4 mb-4 mt-2 pa-4 rounded-lg"
+            <div v-if="expandedId === getId(song)" class="mx-4 mb-4 pa-4 rounded-lg"
               style="background: rgba(0,0,0,0.04);">
               <div class="d-flex align-center justify-space-between mb-3">
                 <div class="text-subtitle-2 font-weight-bold">Tab</div>
 
-                <v-btn v-if="getTab(song)" size="small" variant="outlined" @click="copyTab(song)">
+                <v-btn v-if="getTab(song)" size="small" variant="outlined" @click.stop="copyTab(song)">
                   <v-icon start size="18">mdi-content-copy</v-icon>
                   Copy
                 </v-btn>
               </div>
 
-              <v-alert v-if="!getTab(song)" type="info" variant="tonal" border="start">
-                No tab content available for this song yet.
+              <v-alert v-if="!getTab(song)" type="info" variant="outlined" border="start">
+                No tab content available.
               </v-alert>
 
               <pre v-else class="tab-box">{{ getTab(song) }}</pre>
             </div>
           </v-expand-transition>
-
-        </template>
-      </v-list>
-    </v-card>
+        </v-card>
+      </v-col>
+    </v-row>
 
     <!-- Delete confirm dialog -->
     <v-dialog v-model="deleteDialog" max-width="520">
@@ -187,7 +202,8 @@ export default {
         { title: "Beginner", value: "beginner" },
         { title: "Intermediate", value: "intermediate" },
         { title: "Advanced", value: "advanced" },
-      ]
+      ],
+      tagFilter: 'all'
     };
   },
 
@@ -226,8 +242,20 @@ export default {
         list = list.filter((s) => (s?.difficulty || 'beginner') === this.difficultyFilter);
       }
 
+      if (this.tagFilter !== 'all') {
+        list = list.filter(s => this.getTags(s).includes(this.tagFilter));
+      }
+
       return list;
     },
+    availableTags() {
+      const set = new Set();
+      (this.songs || []).forEach((s) => {
+        const tags = this.getTags(s);
+        (Array.isArray(tags) ? tags : []).forEach((t) => set.add(t));
+      });
+      return ["all", ...Array.from(set).sort()];
+    }
   },
 
   async created() {
@@ -386,6 +414,26 @@ export default {
         : d === "intermediate"
           ? "warning"
           : "error";
+    },
+
+    getTags(song) {
+      try {
+        const t = song?.tags;
+
+        // if backend already returns array
+        if (Array.isArray(t)) return t.filter(Boolean).map(x => String(x).toLowerCase().trim());
+
+        // if backend returns JSON string
+        const parsed = JSON.parse(t || "[]");
+        if (!Array.isArray(parsed)) return [];
+
+        return parsed
+          .filter(Boolean)
+          .map(x => String(x).toLowerCase().trim())
+          .filter(Boolean);
+      } catch {
+        return [];
+      }
     },
 
   },

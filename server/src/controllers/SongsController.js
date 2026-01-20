@@ -20,7 +20,8 @@ module.exports = {
                 tab: req.body.tab,
                 userId: req.user.id,
                 pdfPath,
-                difficulty: req.body.difficulty || 'beginner'
+                difficulty: req.body.difficulty || 'beginner',
+                tags: typeof req.body.tags === 'string' ? req.body.tags : []
             });
 
             res.send(song);
@@ -57,6 +58,7 @@ module.exports = {
                 tab: req.body.tab,
                 pdfPath: nextPdfPath,
                 difficulty: req.body.difficulty || song.difficulty,
+                tags: typeof req.body.tags === 'string' ? req.body.tags : song.tags
             });
 
             res.send(song);

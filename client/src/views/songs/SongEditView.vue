@@ -99,6 +99,12 @@ export default {
                 this.artist = this.song?.artist || "";
                 this.tab = this.song?.tab || "";
                 this.difficulty = this.song?.difficulty || "beginner";
+                try {
+                    this.tags = JSON.parse(this.song?.tags || "[]");
+                } catch  {
+                    this.tags = [];
+                }
+
             } catch (e) {
                 this.error = e?.response?.data?.error || "Failed to load song.";
             } finally {
@@ -120,6 +126,7 @@ export default {
                 form.append("artist", this.artist || "");
                 form.append("tab", this.tab || "");
                 form.append('difficulty', this.difficulty);
+                form.append("tags", JSON.stringify(this.tags));
 
                 if (this.pdfFile?.length) {
                     form.append("pdf", this.pdfFile[0]);
