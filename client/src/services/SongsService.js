@@ -15,5 +15,8 @@ export default {
     },
     remove(id) {
         return Api().delete(`/songs/${id}`);
+    },
+    toggleFavorite(id) {
+        return Api().patch(`/songs/${id}/favorite`);
     }
 }

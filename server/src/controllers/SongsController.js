@@ -21,7 +21,8 @@ module.exports = {
                 userId: req.user.id,
                 pdfPath,
                 difficulty: req.body.difficulty || 'beginner',
-                tags: typeof req.body.tags === 'string' ? req.body.tags : []
+                tags: typeof req.body.tags === 'string' ? req.body.tags : [],
+                isFavorite: req.body.isFavorite === 'true' || req.body.isFavorite === true
             });
 
             res.send(song);
@@ -53,12 +54,17 @@ module.exports = {
             const nextPdfPath = req.file ? `/uploads/${req.file.filename}` : song.pdfPath;
 
             await song.update({
-                title: req.body.title,
+                title: req.body.title,   
                 artist: req.body.artist,
-                tab: req.body.tab,
+                tab: req.body.tab, 
                 pdfPath: nextPdfPath,
                 difficulty: req.body.difficulty || song.difficulty,
-                tags: typeof req.body.tags === 'string' ? req.body.tags : song.tags
+                tags: typeof req.body.tags === 'string' ? req.body.tags : song.tags,
+                isFavorite:
+                    req.body.isFavorite === undefined
+                        ? song.isFavorite
+                        : (req.body.isFavorite === 'true' || req.body.isFavorite === true),
+
             });
 
             res.send(song);
@@ -84,6 +90,19 @@ module.exports = {
 
         } catch (error) {
             res.status(400).send({ error: 'Could not delete song.' })
+        }
+    },
+
+    async toggleFavorite(req, res) {
+        try {
+            const song = await Song.findByPk(req.params.id);
+            if(!song) return res.status(404).send({ error: 'Song not found.'});
+
+            await song.update({ isFavorite: !song.isFavorite });
+            res.send(song);
+        } catch (e) {
+            console.error('PATCH /songs/:id/favorite failed:', e);
+            res.status(400).send({ error: 'Could not toggle favorite.'})
         }
     }
 }

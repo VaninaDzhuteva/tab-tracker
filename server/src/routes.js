@@ -17,4 +17,5 @@ module.exports = (app) => {
   app.get('/songs/:id',  SongsController.show);
   app.put('/songs/:id', upload.single('pdf'), SongsController.update);
   app.delete('/songs/:id', isAuthenticated, SongsController.remove);
+  app.patch('/songs/:id/favorite', SongsController.toggleFavorite);
 }

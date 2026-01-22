@@ -38,6 +38,11 @@
           hide-details="auto">
         </v-select>
       </v-col>
+
+      <v-col cols="12" md="3">
+        <v-switch v-model="favoritesOnly" label="Favorites" color="warning" hide-details="auto" inset />
+      </v-col>
+
     </v-row>
 
     <!-- Errors -->
@@ -92,16 +97,14 @@
                 <div class="text-body-2 text-medium-emphasis mt-1">
                   {{ getSubtitle(song) }}
                 </div>
+                <!-- Tags -->
+                <div class="mt-3 pb-2 d-flex flex-wrap" style="gap: 6px;">
+                  <v-chip v-for="tag in getTags(song).slice(0, 5)" :key="tag" size="x-small" variant="outlined">
+                    {{ tag }}
+                  </v-chip>
+                </div>
 
-                
-                  <!-- Tags -->
-                  <div class="mt-3 pb-2 d-flex flex-wrap" style="gap: 6px;">
-                    <v-chip v-for="tag in getTags(song).slice(0, 5)" :key="tag" size="x-small" variant="outlined">
-                      {{ tag }}
-                    </v-chip>
-                  </div>
 
-                  
               </div>
             </div>
 
@@ -111,6 +114,12 @@
                 @click.stop="toggleExpand(song)">
                 <v-icon>
                   {{ expandedId === getId(song) ? 'mdi-chevron-up' : 'mdi-chevron-down' }}
+                </v-icon>
+              </v-btn>
+              <v-btn icon variant="text" :title="song.isFavorite ? 'Unfavorite' : 'Favorite'"
+                @click.stop="toggleFavorite(song)">
+                <v-icon :color="song.isFavorite ? 'warning' : undefined">
+                  {{ song.isFavorite ? 'mdi-star' : 'mdi-star-outline' }}
                 </v-icon>
               </v-btn>
 
@@ -203,7 +212,8 @@ export default {
         { title: "Intermediate", value: "intermediate" },
         { title: "Advanced", value: "advanced" },
       ],
-      tagFilter: 'all'
+      tagFilter: 'all',
+      favoritesOnly: false,
     };
   },
 
@@ -246,6 +256,10 @@ export default {
         list = list.filter(s => this.getTags(s).includes(this.tagFilter));
       }
 
+      if (this.favoritesOnly) {
+        list = list.filter(s => !!s.isFavorite);
+      }
+
       return list;
     },
     availableTags() {
@@ -255,7 +269,9 @@ export default {
         (Array.isArray(tags) ? tags : []).forEach((t) => set.add(t));
       });
       return ["all", ...Array.from(set).sort()];
-    }
+    },
+
+
   },
 
   async created() {
@@ -436,6 +452,19 @@ export default {
       }
     },
 
+    async toggleFavorite(song) {
+      const id = this.getId(song);
+
+      song.isFavorite = !song.isFavorite;
+
+      try {
+        const res = await SongsService.toggleFavorite(id);
+        song.isFavorite = !!res.data.isFavorite;
+      } catch (e) {
+        song.isFavorite = !song.isFavorite;
+        this.error = e?.response?.data?.error || 'Could not update favorite.'
+      }
+    }
   },
 };
 </script>

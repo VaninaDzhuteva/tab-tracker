@@ -27,6 +27,14 @@
                     Delete
                 </v-btn>
 
+                <v-btn variant="outlined" @click="toggleFavorite">
+                    <v-icon start :color="song?.isFavorite ? 'warning' : undefined">
+                        {{ song?.isFavorite ? 'mdi-star' : 'mdi-star-outline' }}
+                    </v-icon>
+                    {{ song?.isFavorite ? 'Favorited' : 'Favorite' }}
+                </v-btn>
+
+
                 <v-btn v-if="pdfUrl" variant="outlined" :href="pdfUrl" target="_blank">
                     <v-icon start>mdi-file-pdf-box</v-icon>
                     View PDF
@@ -242,6 +250,16 @@ export default {
                     ? "warning"
                     : "error";
         },
+
+        async toggleFavorite() {
+            try {
+                const res = await SongsService.toggleFavorite(this.songId);
+                this.song = res.data;
+                this.snack(this.song.isFavorite ? ' Added to favorites!' : 'Removed from favorites');
+            } catch (e) {
+                this.error = e?.response?.data?.error || 'Could not toggle favorite.'                 
+            }
+        }
 
     }
 }

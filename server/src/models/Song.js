@@ -26,10 +26,16 @@ module.exports = (sequelize, DataTypes) => {
             defaultValue: 'beginner',
         },
         tags: {
-            type: DataTypes.TEXT,   
+            type: DataTypes.TEXT,
             allowNull: false,
             defaultValue: '[]',
         },
+        isFavorite: {
+            type: DataTypes.BOOLEAN,
+            allowNull: false,
+            defaultValue: false,
+        },
+
     })
 
     return Song
