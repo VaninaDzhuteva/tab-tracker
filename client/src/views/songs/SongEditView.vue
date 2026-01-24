@@ -22,17 +22,17 @@
                     :rules="[v => !!v || 'Title is required']" />
 
                 <v-text-field v-model="artist" label="Artist (optional)" variant="outlined" density="comfortable"
-                    hide-details="auto" class="mt-3" />
+                    hide-details="auto" class="mt-5" />
 
-                <v-select v-model="difficulty" :items="difficultyOptions" item-value="value" label="Difficulty"
+                <v-select v-model="difficulty" class="mt-5" :items="difficultyOptions" item-value="value" label="Difficulty"
                     prepend-inner-icon="mdi-signal" variant="outlined" density="comfortable" hide-details="auto" />
 
                 <v-textarea v-model="tab" label="Tab (optional)" variant="outlined" density="comfortable"
-                    hide-details="auto" rows="10" class="mt-3" />
+                    hide-details="auto" rows="10" class="mt-5" />
 
                 <v-file-input v-model="pdfFile" label="Replace PDF tab (optional)" accept="application/pdf"
                     prepend-inner-icon="mdi-file-pdf-box" prepend-icon="" variant="outlined" density="comfortable"
-                    hide-details="auto" class="mt-3" show-size :multiple="false" />
+                    hide-details="auto" class="mt-5" show-size :multiple="false" />
 
                 <div v-if="currentPdfUrl" class="mt-4">
                     <div class="text-subtitle-2 font-weight-bold mb-2">Current PDF</div>

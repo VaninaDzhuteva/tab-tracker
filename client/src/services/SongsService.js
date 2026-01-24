@@ -18,5 +18,9 @@ export default {
     },
     toggleFavorite(id) {
         return Api().patch(`/songs/${id}/favorite`);
-    }
+    },
+    practiceNow(id, payload = {}) {
+        return Api().patch(`/songs/${id}/practice`, payload)
+    },
+
 }

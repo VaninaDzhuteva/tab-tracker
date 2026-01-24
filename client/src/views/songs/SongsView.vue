@@ -79,7 +79,7 @@
             <div class="d-flex align-center" style="gap: 12px;">
 
               <div>
-                <div class="d-flex align-center justify-space-between" style="gap: 8px;">
+                <div class="d-flex align-center" style="gap: 8px;">
                   <div class="font-weight-bold text-body-1">
                     {{ getTitle(song) }}
                   </div>
@@ -88,10 +88,7 @@
                     {{ difficultyLabel(getDifficulty(song)) }}
                   </v-chip>
 
-                  <v-btn icon variant="text" color="error" title="Delete" :loading="deletingId === getId(song)"
-                    @click.stop="askDelete(song)">
-                    <v-icon>mdi-delete-outline</v-icon>
-                  </v-btn>
+
                 </div>
 
                 <div class="text-body-2 text-medium-emphasis mt-1">
@@ -106,6 +103,7 @@
 
 
               </div>
+
             </div>
 
             <!-- Actions -->
@@ -121,6 +119,11 @@
                 <v-icon :color="song.isFavorite ? 'warning' : undefined">
                   {{ song.isFavorite ? 'mdi-star' : 'mdi-star-outline' }}
                 </v-icon>
+              </v-btn>
+
+              <v-btn icon variant="text" color="error" title="Delete" :loading="deletingId === getId(song)"
+                @click.stop="askDelete(song)">
+                <v-icon>mdi-delete-outline</v-icon>
               </v-btn>
 
             </div>
@@ -146,6 +149,21 @@
               <pre v-else class="tab-box">{{ getTab(song) }}</pre>
             </div>
           </v-expand-transition>
+
+          <div class="pa-4">
+            <div class="d-flex align-center justify-space-between text-caption text-medium-emphasis">
+              <span>Progress</span>
+              <span>{{ (song.progress ?? 0) }}%</span>
+            </div>
+            <v-progress-linear :model-value="song.progress ?? 0" height="8" rounded class="mt-1" />
+            <div class="text-caption text-medium-emphasis mt-2">
+              Last practiced:
+              <span class="font-weight-medium">
+                {{ song.lastPracticedAt ? formatDate(song.lastPracticedAt) : 'Never' }}
+              </span>
+            </div>
+          </div>
+
         </v-card>
       </v-col>
     </v-row>
@@ -464,7 +482,7 @@ export default {
         song.isFavorite = !song.isFavorite;
         this.error = e?.response?.data?.error || 'Could not update favorite.'
       }
-    }
+    },
   },
 };
 </script>

@@ -42,6 +42,34 @@
             </div>
         </div>
 
+        <v-card class="mt-6 pa-6 mb-5" rounded="xl">
+            <div class="d-flex align-center justify-space-between mb-4">
+                <div class="text-subtitle-1 font-weight-bold">Practice progress</div>
+                <div class="text-body-2 text-medium-emphasis">{{ progressLocal }}%</div>
+            </div>
+
+            <v-slider v-model="progressLocal" :min="0" :max="100" step="5" hide-details="auto" />
+
+            <div class="d-flex align-center justify-space-between mt-3 ">
+                <div class="text-caption text-medium-emphasis">
+                    Last practiced:
+                    <b>{{ song?.lastPracticedAt ? formatDate(song.lastPracticedAt) : 'Never' }}</b>
+                </div>
+
+                <div class="d-flex" style="gap: 10px;">
+                    <v-btn variant="outlined" @click="saveProgress" :loading="savingProgress">
+                        Save
+                    </v-btn>
+
+                    <v-btn color="primary" @click="practiceNow" :loading="practicing">
+                        <v-icon start>mdi-timer</v-icon>
+                        Practice now
+                    </v-btn>
+                </div>
+            </div>
+        </v-card>
+
+
         <v-alert v-if="error" type="error" variant="tonal" class="mb-4" border="start">
             {{ error }}
         </v-alert>
@@ -123,7 +151,9 @@ export default {
             serverUrl: "http://localhost:8081",
             deleteDialog: false,
             deleting: false,
-
+            progressLocal: 0,
+            savingProgress: false,
+            practicing: false,
         }
     },
 
@@ -186,6 +216,7 @@ export default {
                 const id = this.$route.params.id;
                 const res = await SongsService.getById(id);
                 this.song = res.data;
+                this.progressLocal = Number(this.song?.progress ?? 0);
             } catch (e) {
                 this.error = e?.response?.data?.error || "Failed to load song.";
             } finally {
@@ -257,9 +288,38 @@ export default {
                 this.song = res.data;
                 this.snack(this.song.isFavorite ? ' Added to favorites!' : 'Removed from favorites');
             } catch (e) {
-                this.error = e?.response?.data?.error || 'Could not toggle favorite.'                 
+                this.error = e?.response?.data?.error || 'Could not toggle favorite.'
             }
-        }
+        },
+
+        async saveProgress() {
+            this.savingProgress = true
+            try {
+                const form = new FormData()
+                form.append("progress", String(this.progressLocal))
+                const res = await SongsService.update(this.songId, form)
+                this.song = res.data
+                this.snack("Progress saved.")
+            } catch (e) {
+                this.error = e?.response?.data?.error || "Failed to save progress."
+            } finally {
+                this.savingProgress = false
+            }
+        },
+
+        async practiceNow() {
+            this.practicing = true
+            try {
+                const res = await SongsService.practiceNow(this.songId, { bumpProgress: 0 })
+                this.song = res.data
+                this.progressLocal = Number(this.song?.progress ?? 0)
+                this.snack("Logged practice!")
+            } catch (e) {
+                this.error = e?.response?.data?.error || "Failed to log practice."
+            } finally {
+                this.practicing = false
+            }
+        },
 
     }
 }

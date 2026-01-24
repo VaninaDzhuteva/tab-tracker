@@ -36,6 +36,18 @@ module.exports = (sequelize, DataTypes) => {
             defaultValue: false,
         },
 
+        progress: {
+            type: DataTypes.INTEGER,
+            allowNull: false,
+            defaultValue: 0,
+            validate: { min: 0, max: 100 },
+        },
+
+        lastPracticedAt: {
+            type: DataTypes.DATE,
+            allowNull: true,
+        },
+
     })
 
     return Song

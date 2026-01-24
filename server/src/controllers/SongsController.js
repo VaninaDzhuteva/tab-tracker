@@ -22,7 +22,10 @@ module.exports = {
                 pdfPath,
                 difficulty: req.body.difficulty || 'beginner',
                 tags: typeof req.body.tags === 'string' ? req.body.tags : [],
-                isFavorite: req.body.isFavorite === 'true' || req.body.isFavorite === true
+                isFavorite: req.body.isFavorite === 'true' || req.body.isFavorite === true,
+                progress: Number(req.body.progress ?? 0) || 0,
+                lastPracticedAt: req.body.lastPracticedAt ? new Date(req.body.lastPracticedAt) : null,
+
             });
 
             res.send(song);
@@ -54,9 +57,9 @@ module.exports = {
             const nextPdfPath = req.file ? `/uploads/${req.file.filename}` : song.pdfPath;
 
             await song.update({
-                title: req.body.title,   
+                title: req.body.title,
                 artist: req.body.artist,
-                tab: req.body.tab, 
+                tab: req.body.tab,
                 pdfPath: nextPdfPath,
                 difficulty: req.body.difficulty || song.difficulty,
                 tags: typeof req.body.tags === 'string' ? req.body.tags : song.tags,
@@ -64,6 +67,11 @@ module.exports = {
                     req.body.isFavorite === undefined
                         ? song.isFavorite
                         : (req.body.isFavorite === 'true' || req.body.isFavorite === true),
+                progress: req.body.progress === undefined ? song.progress : Number(req.body.progress),
+                lastPracticedAt:
+                    req.body.lastPracticedAt === undefined
+                        ? song.lastPracticedAt
+                        : (req.body.lastPracticedAt ? new Date(req.body.lastPracticedAt) : null),
 
             });
 
@@ -96,13 +104,34 @@ module.exports = {
     async toggleFavorite(req, res) {
         try {
             const song = await Song.findByPk(req.params.id);
-            if(!song) return res.status(404).send({ error: 'Song not found.'});
+            if (!song) return res.status(404).send({ error: 'Song not found.' });
 
             await song.update({ isFavorite: !song.isFavorite });
             res.send(song);
         } catch (e) {
             console.error('PATCH /songs/:id/favorite failed:', e);
-            res.status(400).send({ error: 'Could not toggle favorite.'})
+            res.status(400).send({ error: 'Could not toggle favorite.' })
+        }
+    },
+    
+    async practiceNow(req, res) {
+        try {
+            const song = await Song.findByPk(req.params.id)
+            if (!song) return res.status(404).send({ error: 'Song not found.' })
+
+            const bump = req.body?.bumpProgress ? Number(req.body.bumpProgress) : 0
+            const nextProgress = Math.max(0, Math.min(100, (song.progress || 0) + bump))
+
+            await song.update({
+                lastPracticedAt: new Date(),
+                progress: nextProgress,
+            })
+
+            res.send(song)
+        } catch (e) {
+            console.error('PATCH /songs/:id/practice failed:', e)
+            res.status(400).send({ error: 'Could not save practice.' })
         }
     }
+
 }
