@@ -12,55 +12,26 @@
             </p>
           </div>
 
-          <v-form v-model="isValid" @submit.prevent="login">
+          <v-form ref="form" @submit.prevent="login">
             <!-- Email -->
-            <v-text-field
-              v-model.trim="email"
-              label="Email"
-              type="email"
-              autocomplete="email"
-              prepend-inner-icon="mdi-email-outline"
-              variant="outlined"
-              density="comfortable"
-              :rules="emailRules"
-              class="mb-3"
-            />
+            <v-text-field v-model.trim="email" label="Email" type="email" autocomplete="email"
+              prepend-inner-icon="mdi-email-outline" variant="outlined" density="comfortable" :rules="emailRules"
+              class="mb-3" />
 
             <!-- Password -->
-            <v-text-field
-              v-model="password"
-              :type="showPassword ? 'text' : 'password'"
-              label="Password"
-              autocomplete="current-password"
-              prepend-inner-icon="mdi-lock-outline"
+            <v-text-field v-model="password" :type="showPassword ? 'text' : 'password'" label="Password"
+              autocomplete="current-password" prepend-inner-icon="mdi-lock-outline"
               :append-inner-icon="showPassword ? 'mdi-eye-off' : 'mdi-eye'"
-              @click:append-inner="showPassword = !showPassword"
-              variant="outlined"
-              density="comfortable"
-              :rules="passwordRules"
-            />
+              @click:append-inner="showPassword = !showPassword" variant="outlined" density="comfortable"
+              :rules="passwordRules" />
 
             <!-- Error -->
-            <v-alert
-              v-if="error"
-              type="error"
-              variant="tonal"
-              class="mt-4"
-              border="start"
-            >
+            <v-alert v-if="error" type="error" variant="tonal" class="mt-4" border="start">
               {{ error }}
             </v-alert>
 
             <!-- Submit -->
-            <v-btn
-              class="mt-5"
-              color="primary"
-              size="large"
-              block
-              type="submit"
-              :loading="loading"
-              :disabled="!isValid || loading"
-            >
+            <v-btn class="mt-5" color="primary" size="large" block type="submit" :loading="loading" :disabled="loading">
               Log in
             </v-btn>
 
@@ -107,6 +78,9 @@ export default {
   methods: {
     async login() {
       this.error = null;
+      const { valid } = await this.$refs.form.validate();
+      if (!valid) return;
+
       this.loading = true;
 
       try {

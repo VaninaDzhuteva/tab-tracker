@@ -37,7 +37,7 @@ const routes = [{
     name: 'song-details',
     component: SongDetailsView
 },
-{   
+{
     path: '/songs/:id/edit',
     name: 'song-edit',
     component: SongEditView
@@ -47,6 +47,16 @@ const routes = [{
 const router = createRouter({
     history: createWebHistory(process.env.BASE_URL),
     routes
+});
+
+router.beforeEach((to, from, next) => {
+    const isLoggedIn = !!localStorage.getItem('token');
+
+    if(!isLoggedIn && to.path.startsWith('/songs')) {
+        return next('/login');
+    }
+
+    next();
 });
 
 export default router;

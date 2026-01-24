@@ -48,7 +48,11 @@ module.exports = (sequelize, DataTypes) => {
             allowNull: true,
         },
 
-    })
+    });
+
+    Song.associate = (models) => {
+        Song.belongsTo(models.User, { foreignKey: 'userId'});
+    }
 
     return Song
 }

@@ -3,7 +3,10 @@ const { Song } = require('../models')
 module.exports = {
     async index(req, res) {
         try {
-            const songs = await Song.findAll({ order: [['createdAt', 'DESC']] })
+            const songs = await Song.findAll({
+                where: { userId: req.user.id },
+                order: [['createdAt', 'DESC']]
+            });
             res.send(songs);
         } catch (err) {
             res.status(500).send({ error: 'Failed to fetch songs' })
@@ -42,6 +45,10 @@ module.exports = {
                 return res.status(404).send({ error: 'Song not found!' });
             }
 
+            if (song.userId !== req.user.id) {
+                return res.status(403).send({ error: "You are not allowed to access this song." });
+            }
+
             res.send(song);
         } catch (e) {
             console.error('GET /songs/:id failed:', e);
@@ -53,6 +60,10 @@ module.exports = {
         try {
             const song = await Song.findByPk(req.params.id);
             if (!song) return res.status(404).send({ error: 'Song not found.' });
+
+            if (song.userId !== req.user.id) {
+                return res.status(403).send({ error: "You are not allowed to access this song." });
+            }
 
             const nextPdfPath = req.file ? `/uploads/${req.file.filename}` : song.pdfPath;
 
@@ -86,6 +97,13 @@ module.exports = {
         try {
             const { id } = req.params;
 
+            const song = await Song.findByPk(req.params.id);
+            if (!song) return res.status(404).send({ error: "Song not found." });
+
+            if (song.userId !== req.user.id) {
+                return res.status(403).send({ error: "You are not allowed to access this song." });
+            }
+
             const deletedCount = await Song.destroy({
                 where: { id, userId: req.user.id }
             });
@@ -106,6 +124,10 @@ module.exports = {
             const song = await Song.findByPk(req.params.id);
             if (!song) return res.status(404).send({ error: 'Song not found.' });
 
+            if (song.userId !== req.user.id) {
+                return res.status(403).send({ error: "You are not allowed to access this song." });
+            }
+
             await song.update({ isFavorite: !song.isFavorite });
             res.send(song);
         } catch (e) {
@@ -113,11 +135,15 @@ module.exports = {
             res.status(400).send({ error: 'Could not toggle favorite.' })
         }
     },
-    
+
     async practiceNow(req, res) {
         try {
             const song = await Song.findByPk(req.params.id)
-            if (!song) return res.status(404).send({ error: 'Song not found.' })
+            if (!song) return res.status(404).send({ error: 'Song not found.' });
+
+            if (song.userId !== req.user.id) {
+                return res.status(403).send({ error: "You are not allowed to access this song." });
+            }
 
             const bump = req.body?.bumpProgress ? Number(req.body.bumpProgress) : 0
             const nextProgress = Math.max(0, Math.min(100, (song.progress || 0) + bump))
