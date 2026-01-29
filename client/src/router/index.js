@@ -6,6 +6,7 @@ import SongsView from '@/views/songs/SongsView.vue'
 import CreateSong from '@/views/songs/SongCreateView.vue'
 import SongDetailsView from '@/views/songs/SongDetailsView.vue';
 import SongEditView from '@/views/songs/SongEditView.vue';
+import ProfileView from '@/views/profile/ProfileView.vue';
 
 const routes = [{
     path: '/',
@@ -41,7 +42,12 @@ const routes = [{
     path: '/songs/:id/edit',
     name: 'song-edit',
     component: SongEditView
-}
+},
+ {
+    path: '/profile',
+    name: 'profile',
+    component: ProfileView
+ }
 ];
 
 const router = createRouter({

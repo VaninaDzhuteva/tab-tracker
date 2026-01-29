@@ -16,7 +16,7 @@
         <!-- CTA buttons -->
         <div class="mt-6 d-flex justify-center flex-wrap" style="gap: 12px;">
           <template v-if="isLoggedIn">
-            <v-btn color="primary" large elevation="2" @click="goToSongs">
+            <v-btn color="primary" large elevation="6" @click="goToSongs">
               Go to Songs
             </v-btn>
             <v-btn variant="outlined" large @click="goToCreate">
@@ -25,7 +25,7 @@
           </template>
 
           <template v-else>
-            <v-btn color="primary" large elevation="2" @click="goToRegister">
+            <v-btn color="primary" large elevation="6" @click="goToRegister">
               Create account
             </v-btn>
             <v-btn variant="outlined" large @click="goToLogin">
@@ -41,7 +41,7 @@
 
       <!-- Features -->
       <v-col cols="12" md="4" v-for="(feature, i) in features" :key="i">
-        <v-card elevation="2" class="pa-4">
+        <v-card elevation="6" class="pa-4">
           <v-icon size="40" color="primary">{{ feature.icon }}</v-icon>
           <h3 class="headline font-weight-bold mt-3">
             {{ feature.title }}
@@ -105,5 +105,11 @@ export default {
 <style lang="css">
   .v-main {
     margin-top: 70px;
+  }
+
+  @media screen and (max-width: 768px) {
+    .v-main {
+      margin-top: 30px;
+    }
   }
 </style>

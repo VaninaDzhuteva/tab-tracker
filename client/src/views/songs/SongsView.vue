@@ -1,9 +1,9 @@
 <template>
   <v-container>
     <!-- Header -->
-    <div class="d-flex align-center justify-space-between mb-6">
+    <div class="d-flex align-center justify-space-between mb-6 songs-header">
       <div>
-        <h1 class="text-h5 font-weight-bold">All Songs</h1>
+        <h1 class="text-h5 font-weight-bold">My Songs</h1>
         <p class="text-body-2 text-medium-emphasis">
           Browse everything returned from <code>/songs</code>.
         </p>
@@ -57,7 +57,7 @@
     </v-card>
 
     <!-- Empty state -->
-    <v-card v-else-if="filteredSongs.length === 0" class="pa-10 text-center" rounded="xl" elevation="2">
+    <v-card v-else-if="filteredSongs.length === 0" class="pa-10 text-center" rounded="xl" elevation="6">
       <v-icon size="48" color="primary">mdi-playlist-music</v-icon>
       <h2 class="text-h6 font-weight-bold mt-3">No songs found</h2>
       <p class="text-body-2 text-medium-emphasis mt-1">
@@ -68,7 +68,7 @@
     <!-- List -->
     <v-row v-else dense>
       <v-col v-for="song in filteredSongs" :key="getId(song)" cols="12" md="6" lg="4">
-        <v-card rounded="xl" elevation="2" class="h-100 song-card" @click="$router.push(`/songs/${getId(song)}`)">
+        <v-card rounded="xl" elevation="6" class="h-100 song-card" @click="$router.push(`/songs/${getId(song)}`)">
           <!-- Header -->
           <div class="d-flex align-center justify-center pa-4">
             <v-avatar color="primary" variant="tonal">
@@ -504,5 +504,16 @@ code {
   white-space: pre-wrap;
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
     "Courier New", monospace;
+}
+
+@media screen and (max-width: 560px) {
+  .songs-header {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .songs-header div:first-child {
+    margin-bottom: 15px;
+  }
 }
 </style>

@@ -14,24 +14,46 @@
     </template>
 
     <!-- Authenticated links -->
+    <!-- Authenticated links -->
     <template v-else>
       <v-btn variant="text" to="/songs">Songs</v-btn>
       <v-btn variant="text" to="/songs/create">Add Tab</v-btn>
 
-      <v-menu>
+      <!-- Profile dropdown -->
+      <v-menu v-model="profileMenuOpen" location="bottom end" origin="top end" :offset="10" :max-width="260">
         <template #activator="{ props }">
-          <v-btn variant="text" v-bind="props">
-            {{ user.email }}
+          <v-btn icon v-bind="props" class="">
+            <v-avatar color="primary" variant="tonal" size="36">
+              <v-icon>mdi-account</v-icon>
+            </v-avatar>
           </v-btn>
         </template>
 
-        <v-list>
-          <v-list-item @click="logout">
-            <v-list-item-title>Logout</v-list-item-title>
-          </v-list-item>
-        </v-list>
+        <v-card min-width="200" max-width="240">
+          <v-list density="comfortable">
+            <v-list-item to="/profile" router>
+              <template #prepend>
+                <v-icon>mdi-account-circle</v-icon>
+              </template>
+              <v-list-item-title class="pa-2">Profile</v-list-item-title>
+              <v-list-item-subtitle class="pa-2" v-if="user.email">
+                {{ user.email }}
+              </v-list-item-subtitle>
+            </v-list-item>
+
+            <v-divider />
+
+            <v-list-item @click="logout">
+              <template #prepend>
+                <v-icon color="error">mdi-logout</v-icon>
+              </template>
+              <v-list-item-title class="text-error pa-2">Logout</v-list-item-title>
+            </v-list-item>
+          </v-list>
+        </v-card>
       </v-menu>
     </template>
+
   </v-app-bar>
 </template>
 
@@ -40,6 +62,12 @@ import { auth } from "@/store/auth";
 
 export default {
   name: "AppNavigation",
+
+  data() {
+    return {
+      profileMenuOpen: false
+    }
+  },
 
   computed: {
     isLoggedIn() {
@@ -58,6 +86,18 @@ export default {
     goHome() {
       this.$router.push("/");
     },
+
+    closeProfileMenu() {
+      this.profileMenuOpen = false;
+      this.logout();
+    },
+
+    logoutAndClose() {
+      auth.clear?.();
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
+      this.$router.push("/login");
+    }
   },
 };
 </script>
